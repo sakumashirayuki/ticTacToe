@@ -48,6 +48,7 @@ void ticTacToe::paint(int x, int y, int label)
 	}
 }
 
+//绘制人机对战或者双人对战的选项--初始化
 void ticTacToe::paintEvent(QPaintEvent *event)
 {
 	QPixmap pixmap = QPixmap(":/new/prefix1/p.png").scaled(this->size());
@@ -65,7 +66,7 @@ void ticTacToe::paintEvent(QPaintEvent *event)
 	}
 	QPainter pa(this);
 	pa.setPen(QPen(Qt::blue, 4, Qt::SolidLine));
-	if (!com)
+	if (!com)//com=0时为双人对战
 	{
 		if (turn == 1)
 		{
@@ -98,8 +99,11 @@ void ticTacToe::paintEvent(QPaintEvent *event)
 	}
 	update();
 }
+
+//判断是否游戏结束
 int ticTacToe::gameover()
 {
+	//以下为6种获胜情况，返回获胜玩家符号
 	if (chess[0][0] && chess[0][0] == chess[0][1] && chess[0][0] == chess[0][2])return chess[0][0];
 	if (chess[0][0] && chess[0][0] == chess[1][1] && chess[0][0] == chess[2][2])return chess[0][0];
 	if (chess[0][0] && chess[0][0] == chess[1][0] && chess[0][0] == chess[2][0])return chess[0][0];
@@ -113,12 +117,14 @@ int ticTacToe::gameover()
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			if (chess[i][j] == 0) { flag = 0; break; }
+			if (chess[i][j] == 0) { flag = 0; break; }//至少有一个地方没有填上棋子
 		}
 	}
-	if (flag)return 3;
-	return 0;
+	if (flag)return 3;//所有区域填充完，但没有分出胜负的情况
+	return 0;//返回0表示游戏继续
 }
+
+//游戏部分主函数，每次落子后调用
 void ticTacToe::res()
 {
 	int xx = gameover();
@@ -141,7 +147,7 @@ void ticTacToe::res()
 		}
 		turn *= -1;
 	}
-	else
+	else//人机对抗
 	{
 		if (xx == turn)
 		{
@@ -153,14 +159,14 @@ void ticTacToe::res()
 			ui->lineEdit_2->setText("平局");
 			ok = 0;
 		}
-		else
+		else//游戏继续进行
 		{
 			int bestmove = -1, value;
 			if (com == 1)findcommove(&bestmove, &value);
-			else findhumanmove(&bestmove, &value);
+			else findhumanmove(&bestmove, &value);//后手的话，计算机代表-1
 			chess[bestmove % 3][bestmove / 3] = turn * (-1);
 			xx = gameover();
-			if (xx == turn * (-1))
+			if (xx == turn * (-1))//当前落子，即计算机方获胜
 			{
 				ui->lineEdit_2->setText("Computer WIN");
 				ok = 0;
@@ -239,6 +245,7 @@ void ticTacToe::on_pushButton_9_clicked()
 	res();
 }
 
+//重新开始
 void ticTacToe::on_pushButton_10_clicked()
 {
 	turn = 1;
@@ -254,11 +261,12 @@ void ticTacToe::on_pushButton_10_clicked()
 		turn = -1;
 	}
 }
-
+//退出游戏
 void ticTacToe::on_pushButton_11_clicked()
 {
 	exit(0);
 }
+
 void ticTacToe::findcommove(int *bestmove, int *value)
 {
 	int bb = -1, response;
@@ -268,7 +276,7 @@ void ticTacToe::findcommove(int *bestmove, int *value)
 		*value = 1;
 	}
 	else if (gameover() == -1)*value = -1;
-	else
+	else//游戏继续进行
 	{
 		*value = -1;
 		for (int i = 0; i < 9; i++)
@@ -278,8 +286,8 @@ void ticTacToe::findcommove(int *bestmove, int *value)
 			{
 				chess[i % 3][i / 3] = 1;
 				findhumanmove(&bb, &response);
-				chess[i % 3][i / 3] = 0;
-				if (response > *value)
+				chess[i % 3][i / 3] = 0;//找到bestmove后恢复盘面
+				if (response > *value)//直到找到计算机获胜或者平局的落子位置，代表max
 				{
 					*value = response;
 					*bestmove = i;
@@ -288,6 +296,7 @@ void ticTacToe::findcommove(int *bestmove, int *value)
 		}
 	}
 }
+
 void ticTacToe::findhumanmove(int *bestmove, int *value)
 {
 	int bb = -1, response;
@@ -307,7 +316,7 @@ void ticTacToe::findhumanmove(int *bestmove, int *value)
 				chess[i % 3][i / 3] = -1;
 				findcommove(&bb, &response);
 				chess[i % 3][i / 3] = 0;
-				if (response < *value)
+				if (response < *value)//这种情况是人类获胜，代表min
 				{
 					*value = response;
 					*bestmove = i;
