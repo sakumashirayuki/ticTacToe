@@ -162,8 +162,19 @@ void ticTacToe::res()
 		else//游戏继续进行
 		{
 			int bestmove = -1, value;
-			if (com == 1)findcommove(&bestmove, &value);
-			else findhumanmove(&bestmove, &value);//后手的话，计算机代表-1
+			int alpha, beta;//使用alpha-beta剪枝
+			if (com == 1)//计算机先手
+			{
+				alpha = -1;//计算机输
+				beta = 1;//计算机赢
+				findcommove(&bestmove, alpha, beta);
+			}
+			else
+			{
+				alpha = 1;//计算机赢
+				beta = -1;//计算机输
+				findhumanmove(&bestmove, alpha, beta);//后手的话，计算机代表-1
+			}
 			chess[bestmove % 3][bestmove / 3] = turn * (-1);
 			xx = gameover();
 			if (xx == turn * (-1))//当前落子，即计算机方获胜
@@ -267,61 +278,65 @@ void ticTacToe::on_pushButton_11_clicked()
 	exit(0);
 }
 
-void ticTacToe::findcommove(int *bestmove, int *value)
+int ticTacToe::findcommove(int *bestmove, int alpha, int beta)
 {
 	int bb = -1, response;
-	if (gameover() == 3)*value = 0;
+	int value;
+	if (gameover() == 3) value = 0;
 	else if (gameover() == 1)
 	{
-		*value = 1;
+		value = 1;
 	}
-	else if (gameover() == -1)*value = -1;
+	else if (gameover() == -1) value = -1;
 	else//游戏继续进行
 	{
-		*value = -1;
-		for (int i = 0; i < 9; i++)
+		value = alpha;
+		for (int i = 0; i < 9&&value<beta; i++)
 		{
 
 			if (!chess[i % 3][i / 3])
 			{
 				chess[i % 3][i / 3] = 1;
-				findhumanmove(&bb, &response);
+				response = findhumanmove(&bb, value, beta);
 				chess[i % 3][i / 3] = 0;//找到bestmove后恢复盘面
-				if (response > *value)//直到找到计算机获胜或者平局的落子位置，代表max
+				if (response > value)//直到找到计算机获胜或者平局的落子位置，代表max
 				{
-					*value = response;
+					value = response;
 					*bestmove = i;
 				}
 			}
 		}
 	}
+	return value;
 }
 
-void ticTacToe::findhumanmove(int *bestmove, int *value)
+int ticTacToe::findhumanmove(int *bestmove, int alpha, int beta)
 {
 	int bb = -1, response;
-	if (gameover() == 3)*value = 0;
+	int value;
+	if (gameover() == 3) value = 0;
 	else if (gameover() == -1)
 	{
-		*value = -1;
+		value = -1;
 	}
-	else if (gameover() == 1)*value = 1;
+	else if (gameover() == 1) value = 1;
 	else
 	{
-		*value = 1;
-		for (int i = 0; i < 9; i++)
+		value = beta;
+		for (int i = 0; i < 9&&value>alpha; i++)
 		{
 			if (!chess[i % 3][i / 3])
 			{
 				chess[i % 3][i / 3] = -1;
-				findcommove(&bb, &response);
+				findcommove(&bb,alpha,value);
 				chess[i % 3][i / 3] = 0;
-				if (response < *value)//这种情况是人类获胜，代表min
+				if (response < value)//这种情况是人类获胜，代表min
 				{
-					*value = response;
+					value = response;
 					*bestmove = i;
 				}
 			}
 		}
 	}
+	return value;
 }

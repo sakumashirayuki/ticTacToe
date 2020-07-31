@@ -18,8 +18,8 @@ public:
 	void paintEvent(QPaintEvent *event);
 	void paint(int x, int y, int label);
 	int gameover();
-	void findcommove(int *bestmove, int *value);
-	void findhumanmove(int *bestmove, int *value);
+	int findcommove(int *bestmove, int alpha, int beta);
+	int findhumanmove(int *bestmove, int alpha, int beta);
 	void res();
 	int com;
 	int chess[3][3];

@@ -1,2 +1,7 @@
-﻿  init2.cpp
+﻿  moc ticTacToe.h
+  init.cpp
+  init2.cpp
+  main.cpp
+  ticTacToe.cpp
+  moc_ticTacToe.cpp
   ticTacToe.vcxproj -> D:\Documents\Visual Studio 2017\Projects\ticTacToe\x64\Debug\ticTacToe.exe
